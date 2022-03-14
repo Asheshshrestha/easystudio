@@ -1,0 +1,6 @@
+django ==2.2.2
+djangorestframework == 3.10
+python-dotenv == 0.14.0
+djangorestframework-simplejwt
+psycopg2-binary
+pillow == 7.2.0
