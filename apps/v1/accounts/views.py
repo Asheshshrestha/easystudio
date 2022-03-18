@@ -1,3 +1,4 @@
+from ast import mod
 from urllib import request
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics
@@ -35,6 +36,7 @@ class UserRegistrationView(generics.CreateAPIView):
             }
         
         return Response(response, status=status_code)
+
 class UpdateUserView(generics.UpdateAPIView):
     serializer_class = UpdateUserSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -77,6 +79,34 @@ class UpdateMyProfile(generics.RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.request.user.id)
         return obj
+    def get(self,request):
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            status_code = status.HTTP_200_OK
+            response = {
+                'success': 'true',
+                'status code': status_code,
+                'message': 'User profile fetched successfully',
+                'data': [{
+                    'first_name': request.user.first_name,
+                    'last_name':  request.user.last_name,
+                    'phone_number': user_profile.phone,
+                    'address': user_profile.address,
+                    'profile_image': user_profile.profile_image.url,
+                    }]
+                }
+
+        except Exception as e:
+            status_code = status.HTTP_400_BAD_REQUEST
+            response = {
+                'success': 'false',
+                'status code': status.HTTP_400_BAD_REQUEST,
+                'message': 'User does not exists',
+                'error': str(e)
+                }
+        return Response(response, status=status_code)
+
+    
 class UserProfileView(generics.RetrieveAPIView):
 
     permission_classes = (permissions.IsAuthenticated,)

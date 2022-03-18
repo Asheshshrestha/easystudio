@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     #my apps
     'apps.v1.accounts',
+    'apps.v1.studio',
     'common',
 
     #third party apps
