@@ -139,38 +139,3 @@ class UserProfileView(generics.RetrieveAPIView):
                 }
         return Response(response, status=status_code)
 
-#========================User Account View End=================================================================
-###############################################################################################################
-
-class StudioProfileView(generics.RetrieveAPIView):
-
-    permission_classes = (IsAdminOrStudio,)
-    authentication_class = JSONWebTokenAuthentication
-
-    
-    def get(self, request):
-        try:
-            user_profile = UserProfile.objects.get(user=request.user)
-            status_code = status.HTTP_200_OK
-            response = {
-                'success': 'true',
-                'status code': status_code,
-                'message': 'User profile fetched successfully',
-                'data': [{
-                    'first_name': request.user.first_name,
-                    'last_name':  request.user.last_name,
-                    'phone_number': user_profile.phone,
-                    'address': user_profile.address,
-                    'profile_image': user_profile.profile_image.url,
-                    }]
-                }
-
-        except Exception as e:
-            status_code = status.HTTP_400_BAD_REQUEST
-            response = {
-                'success': 'false',
-                'status code': status.HTTP_400_BAD_REQUEST,
-                'message': 'User does not exists',
-                'error': str(e)
-                }
-        return Response(response, status=status_code)
