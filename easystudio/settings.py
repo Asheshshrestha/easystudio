@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.v1.accounts',
     'apps.v1.studio',
     'apps.v1.package',
+    'apps.v1.services',
     'common',
 
     #third party apps

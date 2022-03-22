@@ -4,7 +4,7 @@ from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers 
 from apps.v1.package.models import PackageModel
 from django.forms.models import model_to_dict
-
+from common.serializers import Base64ImageField
 
 class PackageSerializers(serializers.ModelSerializer):
 
@@ -13,7 +13,7 @@ class PackageSerializers(serializers.ModelSerializer):
         context = kwargs.get('context')
         if context:
             self.request = context.get('request')
-    
+    package_image = Base64ImageField(max_length=None,use_url = True,)
     class Meta:
         model = PackageModel
         fields = ('pk','in_effect','package_name','package_image','package_price','package_disc')
