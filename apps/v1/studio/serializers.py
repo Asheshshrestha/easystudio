@@ -66,3 +66,9 @@ class UpdateSudioProfileSerializer(WritableNestedModelSerializer):
         instance.last_name = validated_data.get('last_name',instance.last_name)
         instance.save()
         return instance
+
+
+class StudioListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudioProfile
+        fields = ("address","user","phone","profile_image","studio_name","longitude","latitude","marker_icon","cover_image")

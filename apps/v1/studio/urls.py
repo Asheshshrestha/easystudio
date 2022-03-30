@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.urls import path,include
 from apps.v1.package.views import MyStudioPackageAPIView
 urlpatterns = [
+    path("list/",views.ListStudioAPIView.as_view()),
     path("create/",views.StudioRegistrationView.as_view()),
     path("profile/",views.StudioProfileView.as_view()),
     path("update/",views.UpdateStudioProfile.as_view()),

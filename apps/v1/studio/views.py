@@ -7,7 +7,7 @@ from rest_framework import status
 from apps.v1.accounts.models import User
 from apps.v1.studio.models import StudioProfile
 from rest_framework.response import Response
-from apps.v1.studio.serializers import StudioRegistrationSerializer,UpdateSudioProfileSerializer
+from apps.v1.studio.serializers import  StudioListSerializer, StudioRegistrationSerializer,UpdateSudioProfileSerializer
 from common.permissions import IsAdmin, IsAdminOrStudio
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
@@ -110,3 +110,8 @@ class UpdateStudioProfile(generics.RetrieveUpdateAPIView):
                 'error': str(e)
                 }
         return Response(response, status=status_code)
+
+class ListStudioAPIView(generics.ListAPIView):
+    serializer_class = StudioListSerializer
+    queryset = StudioProfile.objects.all()
+    permission_classes= [permissions.IsAuthenticated]

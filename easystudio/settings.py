@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
     #third party apps
     'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -144,7 +145,8 @@ REST_FRAMEWORK = {
          ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
      'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-     )
+     ),
+     
 }
 AUTH_USER_MODEL = "accounts.User"
 JWT_AUTH = {
