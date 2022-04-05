@@ -4,7 +4,7 @@ from urllib import request
 from rest_framework import serializers
 from common.serializers import Base64ImageField
 from apps.v1.accounts.models import User
-from apps.v1.studio.models import StudioProfile
+from apps.v1.studio.models import StudioProfile,StudioRating
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 
 from django.contrib.auth import authenticate
@@ -13,6 +13,7 @@ from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 from apps.v1.accounts.models import User
 from rest_framework import status
+from django.db.models import Q
 
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -68,7 +69,33 @@ class UpdateSudioProfileSerializer(WritableNestedModelSerializer):
         return instance
 
 
+
 class StudioListSerializer(serializers.ModelSerializer):
+    average_rating = serializers.SerializerMethodField()
+    def get_average_rating(self,obj):
+        return obj.average_rating['stars__avg']
     class Meta:
         model = StudioProfile
-        fields = ("address","user","phone","profile_image","studio_name","longitude","latitude","marker_icon","cover_image")
+        fields = ("address","average_rating","user","phone","profile_image","studio_name","longitude","latitude","marker_icon","cover_image")
+
+class StudioRatingSerializer(serializers.ModelSerializer):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        context = kwargs.get('context')
+        if context:
+            self.request = context.get('request')
+    class Meta:
+        model = StudioRating
+        fields = ("pk","stars","studio","rated_user")
+
+    def create(self, validated_data):
+        rating = StudioRating.objects.filter(Q(studio = validated_data.get('studio')) & Q(rated_user = self.request.user)).first()
+        if rating is None:
+            rating = StudioRating(**validated_data)
+            rating.rated_user = self.request.user
+            rating.studio = validated_data.pop('studio')
+            rating.save()
+        else:
+            rating.stars = validated_data.pop('stars')
+            rating.save()
+        return rating

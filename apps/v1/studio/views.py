@@ -1,4 +1,5 @@
 from ast import mod
+from time import perf_counter
 from urllib import request
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics
@@ -7,7 +8,7 @@ from rest_framework import status
 from apps.v1.accounts.models import User
 from apps.v1.studio.models import StudioProfile
 from rest_framework.response import Response
-from apps.v1.studio.serializers import  StudioListSerializer, StudioRegistrationSerializer,UpdateSudioProfileSerializer
+from apps.v1.studio.serializers import  StudioListSerializer, StudioRatingSerializer, StudioRegistrationSerializer,UpdateSudioProfileSerializer,StudioRating
 from common.permissions import IsAdmin, IsAdminOrStudio
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
@@ -115,3 +116,42 @@ class ListStudioAPIView(generics.ListAPIView):
     serializer_class = StudioListSerializer
     queryset = StudioProfile.objects.all()
     permission_classes= [permissions.IsAuthenticated]
+
+class RateStudio(generics.CreateAPIView):
+    authentication_class = JSONWebTokenAuthentication
+    serializer_class = StudioRatingSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+class GetStudioRating(generics.RetrieveAPIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    def get_object(self):
+        pk = self.kwargs['pk']
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=self.request.user.id,studio=pk)
+        return obj
+    def get(self,request,pk):
+        try:
+            rating = StudioRating.objects.get(rated_user=request.user,studio=pk)
+            status_code = status.HTTP_200_OK
+            response = {
+                'success': 'true',
+                'status code': status_code,
+                'message': 'Studio Rating fetch successfully',
+                'data': [{
+                    'rating': rating.stars,
+                    
+                    }]
+                }
+
+        except Exception as e:
+            status_code = status.HTTP_400_BAD_REQUEST
+            response = {
+                'success': 'false',
+                'status code': status.HTTP_400_BAD_REQUEST,
+                'message': 'Studio rating does not exists',
+                'error': str(e)
+                }
+        return Response(response, status=status_code)

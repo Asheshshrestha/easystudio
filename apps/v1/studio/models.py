@@ -1,7 +1,15 @@
 from django.db import models
 from apps.v1.accounts.models import User,UserProfile
 from django.conf import settings
+from django.db.models import Avg
+from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
+
+
+class StudioRating(models.Model):
+    studio = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL, null=True)
+    rated_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True,related_name="rater")
+    stars = models.IntegerField(null=True,blank=True,validators=[MinValueValidator(0),MaxValueValidator(5)])
 
 class StudioProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="studio_profile")
@@ -29,3 +37,9 @@ class StudioProfile(models.Model):
     def get_marker_icon(self):
         if self.marker_icon and hasattr(self.marker_icon,'url'):
             return self.marker_icon.url
+    @property
+    def average_rating(self):
+        rating = StudioRating.objects.filter(studio = self.user)
+        avg_rating = rating.aggregate(Avg('stars'))
+        return avg_rating
+
