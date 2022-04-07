@@ -81,30 +81,34 @@ class UpdateMyProfileSerializer(WritableNestedModelSerializer):
         return instance
 
 class ChangePasswordSerializer(serializers.ModelSerializer):
-    confirm_password =serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True)
-    old_password = serializers.CharField(write_only=True)
+    confirm_password =serializers.CharField(write_only=True,required=False)
+    new_password = serializers.CharField(write_only=True,required=False)
+    old_password = serializers.CharField(write_only=True,required=False)
 
     class Meta:
         model = User
         fields = [ 'old_password', 'new_password','confirm_password']
+        
 
-
+    def validate(self, attrs):
+        if attrs['new_password'] == '':
+              raise serializers.ValidationError({'message': 'new password not found'})
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         instance.password = validated_data.get('password', instance.password)
 
         if not validated_data['new_password']:
-              raise serializers.ValidationError({'new_password': 'not found'})
+              raise serializers.ValidationError({'new_password': 'new password not found'})
 
         if not validated_data['old_password']:
-              raise serializers.ValidationError({'old_password': 'not found'})
+              raise serializers.ValidationError({'old_password': 'old password not found'})
 
         if not instance.check_password(validated_data['old_password']):
-              raise serializers.ValidationError({'old_password': 'wrong password'})
+              raise serializers.ValidationError({'old_password': 'wrong old password'})
 
         if validated_data['new_password'] != validated_data['confirm_password']:
-            raise serializers.ValidationError({'passwords': 'passwords do not match'})
+            raise serializers.ValidationError({'new_password': 'passwords do not match'})
 
         if validated_data['new_password'] == validated_data['confirm_password'] and instance.check_password(validated_data['old_password']):
             # instance.password = validated_data['new_password'] 
@@ -125,7 +129,7 @@ class UserLoginSerializer(serializers.Serializer):
         user = authenticate(username=username, password=password)
         if user is None:
             raise serializers.ValidationError(
-                'A user with this username and password is not found.'
+                {'message':'A user with this username and password is not found.'}
             )
         try:
             payload = JWT_PAYLOAD_HANDLER(user)
@@ -133,7 +137,7 @@ class UserLoginSerializer(serializers.Serializer):
             update_last_login(None, user)
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given username and password does not exists'
+                {'message':'User with given username and password does not exists'}
             )
         return {
             'username':user.username,

@@ -50,7 +50,17 @@ class ChangePasswordView(generics.RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.request.user.id)
         return obj
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        if response.status_code == 200:
+            response = {
+            'success' : 'True',
+            'status code' : status.HTTP_200_OK,
+            'message': 'Changed User Password in  successfully',
+            }
+            response = Response(response,status=status.HTTP_200_OK)
 
+        return response
 class UserLoginView(generics.RetrieveAPIView):
 
     permission_classes = (permissions.AllowAny,)

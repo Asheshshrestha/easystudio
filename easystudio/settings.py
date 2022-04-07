@@ -146,6 +146,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
      'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
      ),
+     'EXCEPTION_HANDLER': 'easystudio.exceptionhandler.api_exception_handler',
      
 }
 AUTH_USER_MODEL = "accounts.User"
